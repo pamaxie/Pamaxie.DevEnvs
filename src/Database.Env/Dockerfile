@@ -1,7 +1,7 @@
 ﻿#/*----------------------*/
 #/*--Set base container--*/
 #/*----------------------*/
-FROM ubuntu:20.04
+FROM gitpod/workspace-dotnet
 #/*----------------------*/
 
 #/*---------------------------------------*/
@@ -22,29 +22,29 @@ ENV RedisPass=admin
 #/*--Add our Startup and Configuration Scripts to the Container--*/
 #/*--------------------------------------*/
 ADD start.sh /
-RUN chmod +x /start.sh
+RUN sudo chmod +x /start.sh
 
-ADD configure_redis.sh /
-RUN chmod +x /start.sh
+ADD configure_redis.sh /data/configure_redis.sh
+RUN sudo chmod +x /data/configure_redis.sh
 
 COPY configure_db.sql /data/configure_db.sql
-RUN chmod +x /data/configure_db.sql
+RUN sudo chmod +x /data/configure_db.sql
 #/*-------------------------------------*/
 
 #/*----------------------------------------------------------------------------*/
 #/*--Run some nessecary configuration to tell programs we are non interactive--*/
 #/*----------------------------------------------------------------------------*/
 #Set our timezone information and use the noninteractive enviorement variable to tell certain programs we are non interactive
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe/Minsk
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV sudo DEBIAN_FRONTEND=noninteractive
+#ENV sudo TZ=Europe/Minsk
+#RUN sudo ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && sudo echo $TZ > /etc/timezone
 
 #/*----------------------------------------------------------------------------*/
 #/*---------------------------------*/
 #/*--Configure our Postgres Server--*/
 #/*---------------------------------*/
 #Install the postgres package
-RUN apt-get update && apt-get install -y postgresql-12 postgresql-contrib-12
+RUN sudo apt-get update && sudo apt-get install -y postgresql-12 postgresql-contrib-12
 
 USER postgres
 
@@ -71,33 +71,32 @@ RUN mv /etc/postgresql/12/main/conf.d /var/lib/postgresql/12/main/conf.d
 RUN mv /etc/postgresql/12/main/postgresql.conf /var/lib/postgresql/12/main/postgresql.conf
 #/*------------------------------*/
 
-RUN apt-get update && apt-get install -y redis-server redis-tools
+RUN sudo apt-get update && apt-get install -y redis-server redis-tools
 
 #/*------------------------------*/
 #/*--Configure our Redis Server--*/
 #/*------------------------------*/
 #Set our default password to admin
-RUN sed -i 's/^# requirepass.*/requirepass admin/' /etc/redis/redis.conf
+RUN sudo sed -i 's/^# requirepass.*/requirepass admin/' /etc/redis/redis.conf
 
 #Set to bind to all addresses
-RUN sed -i "s/^bind 127.0.0.1 ::1.*/# bind 127.0.0.1 ::1%/" /etc/redis/redis.conf
-RUN sed -i "s/^protected-mode yes/# protected-mode yes/" /etc/redis/redis.conf
+RUN sudo sed -i "s/^bind 127.0.0.1 ::1.*/# bind 127.0.0.1 ::1%/" /etc/redis/redis.conf
+RUN sudo sed -i "s/^protected-mode yes/# protected-mode yes/" /etc/redis/redis.conf
 
 #Disable startup logo
-RUN sed -i "s/^always-show-logo yes/# always-show-logo yes/" /etc/redis/redis.conf
-RUN sed -i "s/^searchTerm=daemonize/# daemonize/" /etc/redis/redis.conf
-RUN cat /etc/redis/redis.conf
+RUN sudo sed -i "s/^always-show-logo yes/# always-show-logo yes/" /etc/redis/redis.conf
+RUN sudo sed -i "s/^searchTerm=daemonize/# daemonize/" /etc/redis/redis.conf
+RUN sudo cat /etc/redis/redis.conf
 
 #Add Testing data to redis server
-RUN redis-server /etc/redis/redis.conf &&\
-    bash configure_redis.sh
+RUN sudo redis-server /etc/redis/redis.conf &&\
+    bash /data/configure_redis.sh
 
 #/*------------------------------*/
 
 
 #/*--------------Cleanup after ourselves----------------*/
-RUN rm /data/configure_db.sql
-RUN rm /configure_redis.sh
+RUN sudo rm /data/configure_db.sql
 #/*-----------------------------------------------------*/
 
 # Set the default command to run when starting the container
