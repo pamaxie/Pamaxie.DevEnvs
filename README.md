@@ -1,4 +1,5 @@
 # Pamaxie DevEnvs
+[![Publish Database API Docker Image](https://github.com/pamaxie/Pamaxie.DevEnvs/actions/workflows/docker-publish-db-api.yml/badge.svg)](https://github.com/pamaxie/Pamaxie.DevEnvs/actions/workflows/docker-publish-db-api.yml)
 
 This Repository contains individual build scripts for our development enviorements. These dev enviorements are there to ease development and make it quicker for us to work on our service.
 The individual docker containers are all meant to develop on different APIs, please follow our tutorial (going to be added soon) on our (wiki)[https://wiki.pamaxie.com] on which container to use for which enviorement.
